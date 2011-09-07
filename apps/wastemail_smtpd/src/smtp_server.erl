@@ -29,13 +29,12 @@
 
 start_link() ->
     %gen_smtp_server:start(?MODULE, [[{port, 25}], [{protocol, ssl}, {port, 465}], [{family, inet6}, {address, "::"}]]).
-    io:format("WasteMail SMTPd starting...~n"),
     gen_smtp_server:start_link(?MODULE).
 
 init(Hostname, SessionCount, Address, Options) ->
     io:format("peer: ~p~n", [Address]),
     if
-        SessionCount > 20 ->
+        SessionCount =< 20 ->
             Banner = [Hostname, " WasteMail SMTPd"],
             State = #state{options = Options},
             {ok, Banner, State};
@@ -49,39 +48,39 @@ handle_HELO(<<"invalid">>, State) ->
 handle_HELO(<<"trusted_host">>, State) ->
     {ok, State};
 handle_HELO(Hostname, State) ->
-    io:format("HELO from ~s~n", [Hostname]),
+    io:format("HELO from \"~s\"~n", [Hostname]),
     {ok, 655360, State}.
 
 handle_EHLO(<<"invalid">>, _Extensions, State) ->
     {error, "554 invalid hostname", State};
 handle_EHLO(Hostname, Extensions, State) ->
-    io:format("EHLO from ~s~n", [Hostname]),
+    io:format("EHLO from \"~s\"~n", [Hostname]),
     {ok, Extensions, State}.
 
 handle_MAIL(From, State) ->
-    io:format("Mail from ~s~n", [From]),
+    io:format("Mail from <~s>~n", [From]),
     {ok, State}.
 
 handle_MAIL_extension(Extension, _State) ->
-    io:format("Unknown MAIL FROM extension ~s~n", [Extension]),
+    io:format("Unknown MAIL FROM extension \"~s\"~n", [Extension]),
     error.
 
 handle_RCPT(To, State) ->
-    io:format("Mail to ~s~n", [To]),
+    io:format("Mail to <~s>~n", [To]),
     {ok, State}.
 
 handle_RCPT_extension(Extension, _State) ->
-    io:format("Unknown RCPT TO extension ~s~n", [Extension]),
+    io:format("Unknown RCPT TO extension \"~s\"~n", [Extension]),
     error.
 
 handle_DATA(_From, _To, <<>>, State) ->
     {error, "552 Message too small", State};
 handle_DATA(From, To, Data, State) ->
     Reference = "-",
-    io:format("message from ~s to ~p queued as ~s, body length ~p~n", [From, To, Reference, byte_size(Data)]),
+    io:format("message from <~s> to <~s> queued as \"~s\", body length ~p~n", [From, To, Reference, byte_size(Data)]),
     try mimemail:decode(Data) of
-        _Result ->
-            io:format("Message decoded successfully!~n")
+        Result ->
+            io:format("Message decoded successfully! Result:~n~p~n", [Result])
     catch
         What:Why ->
             io:format("Message decode FAILED with ~p:~p~n", [What, Why]),

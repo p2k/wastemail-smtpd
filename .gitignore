@@ -6,5 +6,5 @@ erl_crash.dump
 deps/
 ebin/
 
-rel/wastemail_smtpd/
+rel/wastemail_smtpd*/
 

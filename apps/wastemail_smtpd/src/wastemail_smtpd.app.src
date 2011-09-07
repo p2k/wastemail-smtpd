@@ -21,8 +21,8 @@
 {application, wastemail_smtpd,
  [
   {description, "A SMTP daemon for temporary e-mail addresses which drops mails into a CouchDB"},
-  {vsn, "0.1"},
-  {registered, []},
+  {vsn, "0.1.2"},
+  {registered, [wastemail_smtpd_app]},
   {applications, [kernel, stdlib, sasl, crypto, ibrowse, couchbeam]},
   {mod, { wastemail_smtpd_app, []}},
   {env, []}
